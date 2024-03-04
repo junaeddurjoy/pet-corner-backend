@@ -29,9 +29,14 @@ async function run() {
         const serviceCollection = client.db("petcornerDB").collection("services");
         const reviewCollection = client.db("petcornerDB").collection("reviews");
 
-
+        // get services result
         app.get('/services', async(req,res) =>{
             const result = await serviceCollection.find().toArray();
+            res.send(result);
+        })
+        // get reviews result
+        app.get('/reviews', async(req,res) =>{
+            const result = await reviewCollection.find().toArray();
             res.send(result);
         } )
 
