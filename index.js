@@ -25,20 +25,35 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
-        
+
         const serviceCollection = client.db("petcornerDB").collection("services");
         const reviewCollection = client.db("petcornerDB").collection("reviews");
+        const cartCollection = client.db("petcornerDB").collection("carts");
 
         // get services result
-        app.get('/services', async(req,res) =>{
+        app.get('/services', async (req, res) => {
             const result = await serviceCollection.find().toArray();
             res.send(result);
         })
         // get reviews result
-        app.get('/reviews', async(req,res) =>{
+        app.get('/reviews', async (req, res) => {
             const result = await reviewCollection.find().toArray();
             res.send(result);
-        } )
+        })
+
+        // cart  collection
+        app.get('/carts', async( req, res) => {
+            const email = req.query.email;
+            const query = {email: email};
+            const result = await cartCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        app.post('/carts', async (req, res) => {
+            const cartItem = req.body;
+            const result = await cartCollection.insertOne(cartItem);
+            res.send(result);
+        })
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
