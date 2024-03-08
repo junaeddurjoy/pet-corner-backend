@@ -55,6 +55,13 @@ async function run() {
             res.send(result);
         })
 
+        app.delete('/carts/:id', async(req,res) => {
+            const id = req.params.id;
+            const query = {_id: new Object(id)}
+            const result = await cartCollection.deleteOne(query);
+            res.send(result);
+        })
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
