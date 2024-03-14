@@ -39,8 +39,8 @@ async function run() {
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '1h'
             });
-            res.send({ token })
-        })
+            res.send({ token });
+        });
 
         // middlewarers
         const verifyToken = (req, res, next) => {
@@ -56,7 +56,6 @@ async function run() {
                 req.decoded = decoded;
                 next();
             })
-            // next();
         }
 
         const verifyAdmin = async (req, res, next) => {
@@ -69,6 +68,7 @@ async function run() {
             }
             next();
         }
+
         // get users result
         app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
             const result = await userCollection.find().toArray();
@@ -77,7 +77,7 @@ async function run() {
 
         app.get('/users/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
-            if (email !== req.decoded.email) {
+            if (email != req.decoded.email) {
                 return res.status(403).send({ message: 'unauthorized access' })
             }
             const query = { email: email };
@@ -121,6 +121,41 @@ async function run() {
         // get services result
         app.get('/services', async (req, res) => {
             const result = await serviceCollection.find().toArray();
+            res.send(result);
+        })
+        app.get('/services/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await serviceCollection.findOne(query);
+            res.send(result);
+        })
+        app.post('/services', verifyToken, verifyAdmin, async (req, res) => {
+            const item = req.body;
+            const result = await serviceCollection.insertOne(item);
+            res.send(result);
+        })
+        app.post('/services/:id', async (req, res) => {
+            const item = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    disease: item.disease,
+                    category: item.category,
+                    pet: item.pet,
+                    price: item.price,
+                    symptoms: item.symptoms,
+                    image: item.image
+                }
+            }
+            const result = await serviceCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+        app.delete('/services/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await serviceCollection.deleteOne(query);
             res.send(result);
         })
         // get reviews result
